@@ -189,7 +189,7 @@ namespace ExcelToImports.Controllers
                                     {
                                         Line = row,
                                         Field = "Valor Unitário",
-                                        InfoError = "coluna" + column.ToString() + "invalida, está vazia",
+                                        InfoError = "Valor invalido, está vazia",
                                     });
                                 }
                             }
