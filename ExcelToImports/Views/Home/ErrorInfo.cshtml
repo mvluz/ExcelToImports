@@ -1,0 +1,37 @@
+﻿@model ExcelToImports.Models.FileUploadViewModel;
+
+@{
+    ViewData["Title"] = "Informações de erros";
+}
+
+<div class="row">
+    
+    <h1>
+        Erros na Importação
+    </h1>
+
+    <table class="table table-active table-bordered" width="100">
+
+        <thead>
+            <tr>
+                <th>Linha</th>
+                <th>Nome da Coluna</th>
+                <th>Observação</th>
+            </tr>
+        </thead>
+        <tbody>
+
+            @foreach (var item in Model.ErrorInfoViewModel.ErrorList)
+            {
+                <tr>
+                    <td>@item.Line</td>
+                    <td>@item.Field</td>
+                    <td>@item.InfoError</td>
+                </tr>
+            }
+
+        </tbody>
+
+    </table>
+
+</div>

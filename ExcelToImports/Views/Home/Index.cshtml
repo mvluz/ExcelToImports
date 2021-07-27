@@ -1,0 +1,92 @@
+﻿@model ExcelToImports.Models.FileUploadViewModel
+
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+
+<div class="text-center">
+    <h1 class="display-4">Importação de Excel</h1>
+
+    <div class="form-group row">
+        <form asp-controller="Home" asp-action="Index" class="text-left form-validate" enctype="multipart/form-data">
+
+            <div class="form-group col-sm-12">
+                <div class="file-select-button" id="fileName">Importar Arquivo Excel</div>
+                <input asp-for="ExcelFile" type="file" id="chooseFile">
+            </div>
+
+            <div class="form-group col-sm-6">
+                <button type="submit" class="btn btn-primary">Importar</button>
+            </div>
+
+        </form>
+    </div>
+
+    <div class="row">
+        <h1>
+            Vizualização dos Registros
+        </h1>
+
+        <table class="table table-active table-bordered" width="100">
+
+            <thead>
+                <tr>
+                    <th>Data de Entrega</th>
+                    <th>Nome do Produto</th>
+                    <th>Quantidade</th>
+                    <th>Valor Unitário</th>
+                    <th>Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                @foreach (var item in Model.ExcelInfoViewModel.ItemsList)
+                {
+                    double subtotal = item.Amount * item.UnitaryValue;
+                    <tr>
+                        <td>@item.DeliveryDate.ToString("dd/MM/yyyy")</td>
+                        <td>@item.ProductName</td>
+                        <td>@item.Amount</td>
+                        <td>@item.UnitaryValue.ToString("C2", System.Globalization.CultureInfo.CurrentCulture)</td>
+                        <td>@subtotal.ToString("C2", System.Globalization.CultureInfo.CurrentCulture)</td>
+                    </tr>
+                }
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <div class="row">
+        <h1>
+            Erros na Importação
+        </h1>
+
+        <table class="table table-active table-bordered" width="100">
+
+            <thead>
+                <tr>
+                    <th>Linha</th>
+                    <th>Nome da Coluna</th>
+                    <th>Observação</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                @foreach (var item in Model.ErrorInfoViewModel.ErrorList)
+                {
+                    <tr>
+                        <td>@item.Line</td>
+                        <td>@item.Field</td>
+                        <td>@item.InfoError</td>
+                    </tr>
+                }
+
+            </tbody>
+
+        </table>
+
+    </div>
+</div>
