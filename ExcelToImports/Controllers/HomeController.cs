@@ -23,7 +23,10 @@ namespace ExcelToImports.Controllers
             _logger = logger;
         }
         */
+        [Obsolete]
         private readonly IHostingEnvironment _hostingEnvironment;
+
+        [Obsolete]
         public HomeController(IHostingEnvironment hostingEnvironment)
         {
             _hostingEnvironment = hostingEnvironment;
@@ -36,13 +39,13 @@ namespace ExcelToImports.Controllers
         }
         
         [HttpPost]
+        [Obsolete]
         public ActionResult Index(FileUploadViewModel fileUplodedVM)
         {
             //FileUploadViewModel fileUplodedErroVM = new FileUploadViewModel();
-            if (fileUplodedVM != null)
+            if (fileUplodedVM.ExcelFile != null)
             {
                 /* save file on server */
-
                 string rootFolder = _hostingEnvironment.WebRootPath;
                 string fileName = Guid.NewGuid().ToString() + fileUplodedVM.ExcelFile.FileName;
                 FileInfo file = new FileInfo(Path.Combine(rootFolder, fileName));
@@ -57,31 +60,31 @@ namespace ExcelToImports.Controllers
                 }
 
                 /* reading and validating file */
-
                 using (ExcelPackage package = new ExcelPackage(file))
-                {
-                    
+                {                    
                     ExcelWorksheet worksheet = package.Workbook.Worksheets.FirstOrDefault();
-                    if (worksheet != null)
+
+                    if (worksheet != null && worksheet.Dimension != null)
                     {
                         var rowCount = worksheet.Dimension.Rows;
                         for (int row = 2; row <= rowCount; row++)
                         {
                             var columnCount = worksheet.Dimension.Columns;
-                            Boolean LineError = false;
+                            Boolean LineError = false;                        
                             for (int column = 1; column <= columnCount; column++) 
-                            {
+                            {                                
                                 var cell = (worksheet.Cells[row, column].Value ?? string.Empty).ToString().Trim();
-                                if (cell != "") // Fix to fix: cell empty
-                                {
+                                if (cell != "")
+                                {                                    
+                                    
+                                    
                                     switch (column)
                                     {
-                                        case 1://DeliveryDate
-                                            DateTime date;
-                                            Boolean IsDate = DateTime.TryParse(worksheet.Cells[row, 1].Value.ToString().Trim(), out date);
+                                        case 1://DeliveryDate                                            
+                                            Boolean IsDate = DateTime.TryParse(worksheet.Cells[row, 1].Value.ToString().Trim(), out DateTime date);
                                             if (IsDate)
                                             {
-                                                DateTime DeliverDate = DateTime.Parse((worksheet.Cells[row, 1].Value).ToString().Trim());
+                                                var DeliverDate = DateTime.Parse((worksheet.Cells[row, 1].Value).ToString().Trim());
                                                 if (DeliverDate <= DateTime.Today)
                                                 {
                                                     LineError = true;
@@ -120,9 +123,8 @@ namespace ExcelToImports.Controllers
                                                 });
                                             }
                                             break;
-                                        case 3://Amount
-                                            int number;
-                                            Boolean IsNumber = int.TryParse(worksheet.Cells[row, 3].Value.ToString().Trim(), out number);
+                                        case 3://Amount                                            
+                                            Boolean IsNumber = int.TryParse(worksheet.Cells[row, 3].Value.ToString().Trim(), out int number);
                                             if (IsNumber)
                                             {
                                                 int Amount = int.Parse(worksheet.Cells[row, 3].Value.ToString().Trim());
@@ -149,9 +151,8 @@ namespace ExcelToImports.Controllers
                                                 });
                                                 break;
                                             }
-                                        case 4://UnitaryValue
-                                            double numberFloat;
-                                            Boolean IsNumberFloat = double.TryParse(worksheet.Cells[row, 4].Value.ToString().Trim(),out numberFloat);
+                                        case 4://UnitaryValue                                            
+                                            Boolean IsNumberFloat = double.TryParse(worksheet.Cells[row, 4].Value.ToString().Trim(),out double numberFloat);
                                             if (IsNumberFloat)
                                             {
                                                 double UnitaryValue = double.Parse(worksheet.Cells[row, 4].Value.ToString().Trim());
@@ -178,19 +179,37 @@ namespace ExcelToImports.Controllers
                                                 });
                                                 break;
                                             }
-                                        default:
+                                        default:                                            
+                                            fileUplodedVM.ErrorInfoViewModel.ErrorList.Add(new ErrorInfoViewModel
+                                            {
+                                                Line = row,
+                                                Field = "Alerta",
+                                                InfoError = "Adicionado coluna a mais. Apenas as 4 primeiras colunas validas são consideradas.",
+                                            });
+                                            
                                             break;
                                     }
                                 }
                                 else
                                 {
-                                    LineError = true;
-                                    fileUplodedVM.ErrorInfoViewModel.ErrorList.Add(new ErrorInfoViewModel
+                                    string field = string.Empty;
+                                    switch (column)
                                     {
-                                        Line = row,
-                                        Field = "Valor Unitário",
-                                        InfoError = "Valor invalido, está vazia",
-                                    });
+                                        case 1: field = "Data de Entrega"; break;
+                                        case 2: field = "Nome do Produto"; break;
+                                        case 3: field = "Quantidade"; break;
+                                        case 4: field = "Valor Unitário"; break;
+                                        default:
+                                            break;
+                                    }
+                                        LineError = true;
+                                        fileUplodedVM.ErrorInfoViewModel.ErrorList.Add(new ErrorInfoViewModel
+                                        {
+                                            Line = row,
+                                            Field = field,
+                                            InfoError = "Valor invalido, está vazia",
+                                        });
+                                    
                                 }
                             }
 
@@ -198,18 +217,23 @@ namespace ExcelToImports.Controllers
                             {
                                 fileUplodedVM.ExcelInfoViewModel.ItemsList.Add(new ExcelInfoViewModel
                                 {
-                                    DeliveryDate = DateTime.Parse((worksheet.Cells[row, 1].Value ?? string.Empty).ToString().Trim()),
+                                    DeliveryDate = DateTime.Parse(worksheet.Cells[row, 1].Value.ToString().Trim()),
                                     ProductName = (worksheet.Cells[row, 2].Value ?? string.Empty).ToString().Trim(),
                                     Amount = int.Parse((worksheet.Cells[row, 3].Value ?? string.Empty).ToString().Trim()),
                                     UnitaryValue = double.Parse((worksheet.Cells[row, 4].Value ?? string.Empty).ToString().Trim()),
-                                }); ;
+                                });
                             }
                         }
                         
                     }
                     else
                     {
-                        //return or alert message here
+                        fileUplodedVM.ErrorInfoViewModel.ErrorList.Add(new ErrorInfoViewModel
+                        {
+                            Line = 0,                            
+                            Field = "Todos",
+                            InfoError = "Documento vazio",
+                        });
                     }
                 }
             }
