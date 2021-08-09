@@ -63,21 +63,17 @@ namespace ExcelToImports.Controllers
                 using (ExcelPackage package = new ExcelPackage(file))
                 {                    
                     ExcelWorksheet worksheet = package.Workbook.Worksheets.FirstOrDefault();
-
                     if (worksheet != null && worksheet.Dimension != null)
                     {
                         var rowCount = worksheet.Dimension.Rows;
                         for (int row = 2; row <= rowCount; row++)
-                        {
-                            var columnCount = worksheet.Dimension.Columns;
+                        {                            
                             Boolean LineError = false;                        
-                            for (int column = 1; column <= columnCount; column++) 
+                            for (int column = 1; column <= 4; column++) 
                             {                                
                                 var cell = (worksheet.Cells[row, column].Value ?? string.Empty).ToString().Trim();
                                 if (cell != "")
                                 {                                    
-                                    
-                                    
                                     switch (column)
                                     {
                                         case 1://DeliveryDate                                            
@@ -179,14 +175,7 @@ namespace ExcelToImports.Controllers
                                                 });
                                                 break;
                                             }
-                                        default:                                            
-                                            fileUplodedVM.ErrorInfoViewModel.ErrorList.Add(new ErrorInfoViewModel
-                                            {
-                                                Line = row,
-                                                Field = "Alerta",
-                                                InfoError = "Adicionado coluna a mais. Apenas as 4 primeiras colunas validas são consideradas.",
-                                            });
-                                            
+                                        default:                                                                                        
                                             break;
                                     }
                                 }
@@ -218,9 +207,9 @@ namespace ExcelToImports.Controllers
                                 fileUplodedVM.ExcelInfoViewModel.ItemsList.Add(new ExcelInfoViewModel
                                 {
                                     DeliveryDate = DateTime.Parse(worksheet.Cells[row, 1].Value.ToString().Trim()),
-                                    ProductName = (worksheet.Cells[row, 2].Value ?? string.Empty).ToString().Trim(),
-                                    Amount = int.Parse((worksheet.Cells[row, 3].Value ?? string.Empty).ToString().Trim()),
-                                    UnitaryValue = double.Parse((worksheet.Cells[row, 4].Value ?? string.Empty).ToString().Trim()),
+                                    ProductName = worksheet.Cells[row, 2].Value.ToString().Trim(),
+                                    Amount = int.Parse(worksheet.Cells[row, 3].Value.ToString().Trim()),
+                                    UnitaryValue = double.Parse(worksheet.Cells[row, 4].Value.ToString().Trim()),
                                 });
                             }
                         }

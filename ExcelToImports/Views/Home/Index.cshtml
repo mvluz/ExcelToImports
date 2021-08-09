@@ -27,36 +27,71 @@
         <h1>
             Vizualização dos Registros
         </h1>
+        @{
+            double totalItem;
+            double totalImport = 0;
+            int totalAmount = 0;
+            DateTime shortestDeliveryDate = DateTime.Now.Date.AddYears(10);
 
-        <table class="table table-active table-bordered" width="100">
+            <table class="table table-active table-bordered" width="100">
 
-            <thead>
-                <tr>
-                    <th>Data de Entrega</th>
-                    <th>Nome do Produto</th>
-                    <th>Quantidade</th>
-                    <th>Valor Unitário</th>
-                    <th>Subtotal</th>
-                </tr>
-            </thead>
-            <tbody>
-
-                @foreach (var item in Model.ExcelInfoViewModel.ItemsList)
-                {
-                    double subtotal = item.Amount * item.UnitaryValue;
+                <thead>
                     <tr>
-                        <td>@item.DeliveryDate.ToString("dd/MM/yyyy")</td>
-                        <td>@item.ProductName</td>
-                        <td>@item.Amount</td>
-                        <td>@item.UnitaryValue.ToString("C2", System.Globalization.CultureInfo.CurrentCulture)</td>
-                        <td>@subtotal.ToString("C2", System.Globalization.CultureInfo.CurrentCulture)</td>
+                        <th>Data de Entrega</th>
+                        <th>Nome do Produto</th>
+                        <th>Quantidade</th>
+                        <th>Valor Unitário</th>
+                        <th>Subtotal</th>
                     </tr>
-                }
+                </thead>
+                <tbody>
 
-            </tbody>
+                    @foreach (var item in Model.ExcelInfoViewModel.ItemsList)
+                    {
+                        totalItem = item.Amount * item.UnitaryValue;
+                        totalImport += totalItem;
+                        totalAmount += item.Amount;
+                        
+                        @if ( shortestDeliveryDate > item.DeliveryDate)
+                        {
+                            shortestDeliveryDate = item.DeliveryDate;
+                        }
 
-        </table>
+                        <tr>
+                            <td>@item.DeliveryDate.ToString("dd/MM/yyyy")</td>
+                            <td>@item.ProductName</td>
+                            <td>@item.Amount</td>
+                            <td>@item.UnitaryValue.ToString("C2", System.Globalization.CultureInfo.CurrentCulture)</td>
+                            <td>@totalItem.ToString("C2", System.Globalization.CultureInfo.CurrentCulture)</td>
+                        </tr>
+                    }
 
+                </tbody>
+
+            </table>
+            <table class="table table-active table-bordered" width="100">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Data de Importação</th>
+                        <th>Quantidades de Itens</th>
+                        <th>Menor Data de Entrega</th>
+                        <th>Total da Importação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td></td>
+                        <td>@DateTime.Now.ToString("dd/MM/yyyy")</td>
+                        <td>@totalAmount.ToString()</td>
+                        <td>@shortestDeliveryDate.ToString("dd/MM/yyyy")</td>
+                        <td>@totalImport.ToString("C2", System.Globalization.CultureInfo.CurrentCulture)</td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+        }
     </div>
 
     <div class="row">
